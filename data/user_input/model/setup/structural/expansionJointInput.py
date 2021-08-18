@@ -396,10 +396,7 @@ class ExpansionJointInput(QDialog):
             if entity.expansion_joint_parameters is None:
                 return
 
-            [read_parameters, read_stiffness]  = entity.expansion_joint_parameters
-          
-            # if isinstance(_parameters, list):
-            #     read_parameters = _parameters
+            [read_parameters, read_stiffness, table_names]  = entity.expansion_joint_parameters
 
             try:
                 self.lineEdit_joint_length.setText(str(read_parameters[0]))
@@ -567,7 +564,7 @@ class ExpansionJointInput(QDialog):
                                             lines_to_update_cross_section = self.lines_to_apply_cross_section)
                 if not read.complete:
                     return
-            self.check_expansion_joint_already_added_to_elements(self.list_elements, self.all_parameters)            
+            self.check_expansion_joint_already_added_to_elements(self.list_elements)            
             self.project.add_expansion_joint_by_elements(self.list_elements, self.all_parameters)
 
         self.update_plots()
@@ -606,7 +603,7 @@ class ExpansionJointInput(QDialog):
         
         return cross, structural_element_type
 
-    def check_expansion_joint_already_added_to_elements(self, list_elements_new, parameters_new):
+    def check_expansion_joint_already_added_to_elements(self, list_elements_new):
         changed = False
         temp_dict = self.preprocessor.group_elements_with_expansion_joints.copy()
         
@@ -828,7 +825,7 @@ class ExpansionJointInput(QDialog):
                                             lines_to_update_cross_section = self.lines_to_apply_cross_section)
                 if not read.complete:
                     return
-            self.check_expansion_joint_already_added_to_elements(self.list_elements, self.all_parameters)
+            self.check_expansion_joint_already_added_to_elements(self.list_elements)
             self.project.add_expansion_joint_by_elements(self.list_elements, self.all_parameters)
         
         self.update_plots()  

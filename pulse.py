@@ -9,6 +9,15 @@ from pulse.uix.mainWindow import MainWindow
 import matplotlib
 matplotlib.use("Qt5Agg")
 
+import warnings
+
+def fxn():
+    warnings.warn("deprecated", DeprecationWarning)
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    fxn()
+
 def init():
     """ OpenPulse init
         The init function starts the OpenPulse software.

@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt
 from PyQt5 import uic
 import configparser
 import os
+import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -326,6 +327,12 @@ class PlotStructuralFrequencyResponseInput(QDialog):
 
         frequencies = self.frequencies
         response = self.get_response()
+        non_dimensional_response = np.absolute(response) / np.sqrt(frequencies)
+
+        # Store frequencies and displacements in dataframe and save in Excel file that is placed on R-drive
+        df1 = pd.DataFrame([frequencies, np.absolute(response), non_dimensional_response],
+                            index=['Frequency [Hz]', 'Displacement [m]', 'Non-dimensional displacement [m/rHz]'])
+        df1.to_excel(r'R:\Projecten\P21-161 Einstein telescoop trillingsvrij koelen\Calculation\ASD.xlsx', index = False)
 
         if self.imported_data is not None:
             data = self.imported_data
@@ -338,9 +345,10 @@ class PlotStructuralFrequencyResponseInput(QDialog):
             elif self.plotImag:
                 imported_Yvalues = data[:,2]
 
+        # Modified unit on y-axis from m to m/rHz
         if self.plotAbs:
             response = np.abs(response)
-            ax.set_ylabel(("Structural Response - Absolute [{}]").format(self.unit_label), fontsize = 14, fontweight = 'bold')
+            ax.set_ylabel(("Structural Response - Absolute [{}/rHz]").format(self.unit_label), fontsize = 14, fontweight = 'bold')
             if not float(0) in response:
                 if self.imported_data is None:
                     ax.set_yscale('log', nonpositive='clip')
@@ -356,26 +364,52 @@ class PlotStructuralFrequencyResponseInput(QDialog):
 
         legend_label = "Response {} at node {}".format(self.localdof_label, self.node_ID)
 
+        # if self.imported_data is None:
+
+        #     if float(0) in response or self.plotReal or self.plotImag:
+        #         if float(0) in response[1:] or self.plotReal or self.plotImag:
+        #             first_plot, = plt.plot(frequencies, response, color=[1,0,0], linewidth=2, label=legend_label)
+        #         else:
+        #             first_plot, = plt.semilogy(frequencies[1:], response[1:], color=[1,0,0], linewidth=2, label=legend_label)
+        #     else: 
+        #         first_plot, = plt.semilogy(frequencies, response, color=[1,0,0], linewidth=2, label=legend_label)
+                
+        #     _legends = plt.legend(handles=[first_plot], labels=[legend_label], loc='upper right')
+        # else:
+        #     if float(0) in response or float(0) in imported_Yvalues or self.plotReal or self.plotImag:
+        #         if float(0) in response[1:] or float(0) in imported_Yvalues[1:] or self.plotReal or self.plotImag:
+        #             first_plot, = plt.plot(frequencies, response, color=[1,0,0], linewidth=2)
+        #             second_plot, = plt.plot(imported_Xvalues, imported_Yvalues, color=[0,0,1], linewidth=1, linestyle="--")
+        #         else:                   
+        #             first_plot, = plt.semilogy(frequencies[1:], response[1:], color=[1,0,0], linewidth=2, label=legend_label)
+        #             second_plot, = plt.semilogy(imported_Xvalues[1:], imported_Yvalues[1:], color=[0,0,1], linewidth=1, linestyle="--")
+        #     else:                
+        #         first_plot, = plt.semilogy(frequencies, response, color=[1,0,0], linewidth=2, label=legend_label)
+        #         second_plot, = plt.semilogy(imported_Xvalues, imported_Yvalues, color=[0,0,1], linewidth=1, linestyle="--")
+        #     _legends = plt.legend(handles=[first_plot, second_plot], labels=[legend_label, self.legend_imported], loc='upper right')
+
+        # Modified response to non_dimensional_response
         if self.imported_data is None:
 
             if float(0) in response or self.plotReal or self.plotImag:
                 if float(0) in response[1:] or self.plotReal or self.plotImag:
-                    first_plot, = plt.plot(frequencies, response, color=[1,0,0], linewidth=2, label=legend_label)
+                    first_plot, = plt.plot(frequencies, non_dimensional_response, color=[1,0,0], linewidth=2, label=legend_label)
                 else:
-                    first_plot, = plt.semilogy(frequencies[1:], response[1:], color=[1,0,0], linewidth=2, label=legend_label)
+                    first_plot, = plt.semilogy(frequencies[1:], non_dimensional_response[1:], color=[1,0,0], linewidth=2, label=legend_label)
             else: 
-                first_plot, = plt.semilogy(frequencies, response, color=[1,0,0], linewidth=2, label=legend_label)
+                first_plot, = plt.semilogy(frequencies, non_dimensional_response, color=[1,0,0], linewidth=2, label=legend_label)
+                
             _legends = plt.legend(handles=[first_plot], labels=[legend_label], loc='upper right')
         else:
-            if float(0) in response or float(0) in imported_Yvalues or self.plotReal or self.plotImag:
-                if float(0) in response[1:] or float(0) in imported_Yvalues[1:] or self.plotReal or self.plotImag:
-                    first_plot, = plt.plot(frequencies, response, color=[1,0,0], linewidth=2)
+            if float(0) in non_dimensional_response or float(0) in imported_Yvalues or self.plotReal or self.plotImag:
+                if float(0) in non_dimensional_response[1:] or float(0) in imported_Yvalues[1:] or self.plotReal or self.plotImag:
+                    first_plot, = plt.plot(frequencies, non_dimensional_response, color=[1,0,0], linewidth=2)
                     second_plot, = plt.plot(imported_Xvalues, imported_Yvalues, color=[0,0,1], linewidth=1, linestyle="--")
                 else:                   
-                    first_plot, = plt.semilogy(frequencies[1:], response[1:], color=[1,0,0], linewidth=2, label=legend_label)
+                    first_plot, = plt.semilogy(frequencies[1:], non_dimensional_response[1:], color=[1,0,0], linewidth=2, label=legend_label)
                     second_plot, = plt.semilogy(imported_Xvalues[1:], imported_Yvalues[1:], color=[0,0,1], linewidth=1, linestyle="--")
             else:                
-                first_plot, = plt.semilogy(frequencies, response, color=[1,0,0], linewidth=2, label=legend_label)
+                first_plot, = plt.semilogy(frequencies, non_dimensional_response, color=[1,0,0], linewidth=2, label=legend_label)
                 second_plot, = plt.semilogy(imported_Xvalues, imported_Yvalues, color=[0,0,1], linewidth=1, linestyle="--")
             _legends = plt.legend(handles=[first_plot, second_plot], labels=[legend_label, self.legend_imported], loc='upper right')
 
